@@ -4,6 +4,7 @@ from sqlalchemy import desc
 
 from app import database
 from model.working import Working
+from dto.usage_dto import UsageDto
 
 
 date_pattern = '%Y-%m-%d'
@@ -12,7 +13,8 @@ date_pattern = '%Y-%m-%d'
 def start_working(data):
     working = Working(
         node_name=data['node_name'],
-        activated=True
+        activated=True,
+        time=datetime.datetime.now()
     )
     save_working_record(working)
 
@@ -20,12 +22,18 @@ def start_working(data):
 def stop_working(data):
     working = Working(
         node_name=data['node_name'],
-        activated=False
+        activated=False,
+        time=datetime.datetime.now()
     )
     save_working_record(working)
 
 
-def get_stats(node_name, string_date):
+def get_node_usage(node_name, string_date):
+    seconds = get_node_usage_in_seconds(node_name, string_date)
+    return {"duration": seconds}
+
+
+def get_node_usage_in_seconds(node_name, string_date):
     date = datetime.datetime.strptime(string_date, date_pattern)
     now = datetime.datetime.now()
 
