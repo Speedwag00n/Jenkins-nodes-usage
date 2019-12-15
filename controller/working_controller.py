@@ -27,16 +27,16 @@ class WorkingStop(Resource):
         pass
 
 
-@working_namespace.route('/stats')
+@working_namespace.route('/stats/<node_name>')
 class WorkingStats(Resource):
-    @working_namespace.param(name='nodeName', description='Node name')
-    @working_namespace.doc(responses={404: 'Node not found'})
+    @working_namespace.param(name='date', description='Date when node was used (example: 2019-12-31)')
+    @working_namespace.doc(responses={404: 'Records for specified node not found'})
     @working_namespace.doc(description='Get stats about node usage')
-    def get(self):
-        node_name = request.args.get("nodeName")
-        return get_stats(node_name)
+    def get(self, node_name):
+        date = request.args.get("date")
+        return get_stats(node_name, date)
 
 
 @working_namespace.errorhandler(NodeNotFoundException)
 def handle_root_exception(error):
-    return {'message': 'Node with specified name not found'}, 404
+    return {'message': 'Records for specified node not found'}, 404

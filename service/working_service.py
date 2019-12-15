@@ -6,6 +6,9 @@ from app import database
 from model.working import Working
 
 
+date_pattern = '%Y-%m-%d'
+
+
 def start_working(data):
     working = Working(
         node_name=data['node_name'],
@@ -22,23 +25,21 @@ def stop_working(data):
     save_working_record(working)
 
 
-def get_stats(node_name):
-    records = Working.query.filter_by(node_name=node_name).order_by(desc(Working.time)).all()
+def get_stats(node_name, string_date):
+    date = datetime.datetime.strptime(string_date, date_pattern)
+    records = Working\
+        .query\
+        .filter_by(node_name=node_name)\
+        .filter(Working.time >= date)\
+        .filter(Working.time < (date + datetime.timedelta(days=1)))\
+        .order_by(desc(Working.time))\
+        .all()
     if len(records) == 0:
         raise NodeNotFoundException
     worked = 0
     hours_for_job = 0
-    date_now = datetime.datetime.now().date()
 
     for record in records:
-        current_date = record.time.date()
-        difference_in_days = (date_now - current_date).days
-        #skip current day
-        if difference_in_days == 0:
-            continue
-        #skip previous day
-        if difference_in_days > 1:
-            break
         hours = record.time.hour
         if record.activated:
             hours_for_job += 24 - hours
@@ -49,10 +50,10 @@ def get_stats(node_name):
 
     #if node started do job previous day
     if hours_for_job < 0:
-        worked += - hours_for_job
+        worked += 24 + hours_for_job
 
     return {
-        "date": date_now.strftime('%Y-%d-%m'),
+        "date": date.strftime(date_pattern),
         "hours": worked
     }
 
