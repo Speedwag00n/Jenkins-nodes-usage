@@ -11,6 +11,7 @@ working_namespace = Namespace('api/working', description='')
 
 @working_namespace.route('/start')
 class Working(Resource):
+    @working_namespace.doc(description='Node started do task request')
     @working_namespace.expect(working_dto, validate=True)
     def post(self):
         start_working(data=json.loads(request.data))
@@ -19,6 +20,7 @@ class Working(Resource):
 
 @working_namespace.route('/stop')
 class Working(Resource):
+    @working_namespace.doc(description='Node finished do task request')
     @working_namespace.expect(working_dto, validate=True)
     def post(self):
         stop_working(data=json.loads(request.data))
