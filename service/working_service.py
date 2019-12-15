@@ -28,14 +28,33 @@ def stop_working(data):
     save_working_record(working)
 
 
-def get_node_usage(node_name, string_date):
-    seconds = get_node_usage_in_seconds(node_name, string_date)
-    return {"duration": seconds}
-
-
-def get_node_usage_in_seconds(node_name, string_date):
+def get_node_usage_one_day(node_name, string_date):
     date = datetime.datetime.strptime(string_date, date_pattern)
+    seconds = get_node_usage_in_seconds(node_name, date)
+    return {"date": date.date(), "duration": seconds}
+
+
+def get_node_usage_period(node_name, string_start_date, string_stop_date):
+    start_date = datetime.datetime.strptime(string_start_date, date_pattern)
+    stop_date = datetime.datetime.strptime(string_stop_date, date_pattern)
+    current_date = start_date
+    usages = list()
+    while current_date <= stop_date:
+        usages.append(
+            {
+                "date": current_date.date(),
+                "duration": get_node_usage_in_seconds(node_name, current_date)
+            }
+        )
+        current_date += datetime.timedelta(days=1)
+    return usages
+
+
+def get_node_usage_in_seconds(node_name, date):
     now = datetime.datetime.now()
+
+    if now.date() < date.date():
+        return 0
 
     records = Working\
         .query\
