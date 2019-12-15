@@ -3,7 +3,6 @@ import json
 from flask import request
 from flask_restplus import Namespace, Resource
 
-from dto.usage_dto import UsageDto
 from dto.working_dto import WorkingDto
 from service.working_service import *
 
