@@ -27,6 +27,8 @@ def stop_working(data):
 
 def get_stats(node_name, string_date):
     date = datetime.datetime.strptime(string_date, date_pattern)
+    worked = 0
+
     records = Working\
         .query\
         .filter_by(node_name=node_name)\
@@ -35,8 +37,23 @@ def get_stats(node_name, string_date):
         .order_by(desc(Working.time))\
         .all()
     if len(records) == 0:
-        raise NodeNotFoundException
-    worked = 0
+        action_day_before = Working\
+            .query\
+            .filter_by(node_name=node_name)\
+            .filter(Working.time < date)\
+            .order_by(desc(Working.time))\
+            .first()
+        if action_day_before is None:
+            raise NodeNotFoundException
+        else:
+            if action_day_before.activated:
+                worked = 24
+            else:
+                worked = 0
+            return {
+                "date": string_date,
+                "hours": worked
+            }
     hours_for_job = 0
 
     for record in records:
@@ -53,7 +70,7 @@ def get_stats(node_name, string_date):
         worked += 24 + hours_for_job
 
     return {
-        "date": date.strftime(date_pattern),
+        "date": string_date,
         "hours": worked
     }
 
