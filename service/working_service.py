@@ -27,6 +27,7 @@ def stop_working(data):
 
 def get_stats(node_name, string_date):
     date = datetime.datetime.strptime(string_date, date_pattern)
+    now = datetime.datetime.now()
 
     records = Working\
         .query\
@@ -46,32 +47,39 @@ def get_stats(node_name, string_date):
             return 0
         else:
             if action_day_before.activated:
-                return 24 * 60 * 60
+                if now.date() == date.date():
+                    return get_duration(now, False)
+                else:
+                    return 24 * 60 * 60
             else:
                 return 0
-        return worked
 
     worked = 0
-    hours_for_job = 0
+    seconds_for_job = 0
 
     for record in records:
         time = record.time
         if record.activated:
-            hours_for_job += get_duration(time)
-            worked += hours_for_job
-            hours_for_job = 0
+            if seconds_for_job == 0 and now.date() == date.date():
+                seconds_for_job -= get_duration(now)
+            seconds_for_job += get_duration(time)
+            worked += seconds_for_job
+            seconds_for_job = 0
         else:
-            hours_for_job -= get_duration(time)
+            seconds_for_job -= get_duration(time)
 
     #if node started do job previous day
-    if hours_for_job < 0:
-        worked += 24 * 60 * 60 + hours_for_job
+    if seconds_for_job < 0:
+        worked += 24 * 60 * 60 + seconds_for_job
     return worked
 
 
-def get_duration(time):
-    seconds = 24 * 60 * 60 - (time.second + time.minute * 60 + time.hour * 60 * 60)
-    return seconds
+def get_duration(time, from_end=True):
+    seconds = time.second + time.minute * 60 + time.hour * 60 * 60
+    if from_end:
+        return 24 * 60 * 60 - seconds
+    else:
+        return seconds
 
 
 def save_working_record(working):
