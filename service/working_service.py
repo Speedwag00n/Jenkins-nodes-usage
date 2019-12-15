@@ -27,7 +27,6 @@ def stop_working(data):
 
 def get_stats(node_name, string_date):
     date = datetime.datetime.strptime(string_date, date_pattern)
-    worked = 0
 
     records = Working\
         .query\
@@ -44,41 +43,37 @@ def get_stats(node_name, string_date):
             .order_by(desc(Working.time))\
             .first()
         if action_day_before is None:
-            raise NodeNotFoundException
+            return 0
         else:
             if action_day_before.activated:
-                worked = 24
+                return 24 * 60 * 60
             else:
-                worked = 0
-            return {
-                "date": string_date,
-                "hours": worked
-            }
+                return 0
+        return worked
+
+    worked = 0
     hours_for_job = 0
 
     for record in records:
-        hours = record.time.hour
+        time = record.time
         if record.activated:
-            hours_for_job += 24 - hours
+            hours_for_job += get_duration(time)
             worked += hours_for_job
             hours_for_job = 0
         else:
-            hours_for_job -= 24 - hours
+            hours_for_job -= get_duration(time)
 
     #if node started do job previous day
     if hours_for_job < 0:
-        worked += 24 + hours_for_job
+        worked += 24 * 60 * 60 + hours_for_job
+    return worked
 
-    return {
-        "date": string_date,
-        "hours": worked
-    }
+
+def get_duration(time):
+    seconds = 24 * 60 * 60 - (time.second + time.minute * 60 + time.hour * 60 * 60)
+    return seconds
 
 
 def save_working_record(working):
     database.session.add(working)
     database.session.commit()
-
-
-class NodeNotFoundException(Exception):
-    pass
