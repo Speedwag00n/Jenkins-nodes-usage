@@ -4,8 +4,6 @@ from sqlalchemy import desc
 
 from app import database
 from model.working import Working
-from dto.usage_dto import UsageDto
-
 
 date_pattern = '%Y-%m-%d'
 
