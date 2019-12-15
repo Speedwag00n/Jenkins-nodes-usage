@@ -18,6 +18,10 @@ def stop_working(data):
     save_working_record(working)
 
 
+def get_stats(node_name):
+    return {"stats": "none for " + node_name}
+
+
 def save_working_record(working):
     database.session.add(working)
     database.session.commit()
