@@ -4,6 +4,7 @@ from sqlalchemy import desc
 
 from app import database
 from model.working import Working
+from service.node_service import get_nodes_names
 
 date_pattern = '%Y-%m-%d'
 
@@ -26,10 +27,26 @@ def stop_working(data):
     save_working_record(working)
 
 
+def get_node_usage_one_day_all(string_date):
+    nodes = get_nodes_names()
+    usages = list()
+    for node in nodes:
+        usages.append(get_node_usage_one_day(node[0], string_date))
+    return usages
+
+
+def get_node_usage_period_all(string_start_date, string_stop_date):
+    nodes = get_nodes_names()
+    usages = list()
+    for node in nodes:
+        usages.append(get_node_usage_period(node[0], string_start_date, string_stop_date))
+    return usages
+
+
 def get_node_usage_one_day(node_name, string_date):
     date = datetime.datetime.strptime(string_date, date_pattern)
     seconds = get_node_usage_in_seconds(node_name, date)
-    return {"date": date.date(), "duration": seconds}
+    return {'node_name': node_name, 'usages': {'date': date.date(), 'duration': seconds}}
 
 
 def get_node_usage_period(node_name, string_start_date, string_stop_date):
@@ -40,12 +57,12 @@ def get_node_usage_period(node_name, string_start_date, string_stop_date):
     while current_date <= stop_date:
         usages.append(
             {
-                "date": current_date.date(),
-                "duration": get_node_usage_in_seconds(node_name, current_date)
+                'date': current_date.date(),
+                'duration': get_node_usage_in_seconds(node_name, current_date)
             }
         )
         current_date += datetime.timedelta(days=1)
-    return usages
+    return {'node_name': node_name, 'usages': usages}
 
 
 def get_node_usage_in_seconds(node_name, date):
