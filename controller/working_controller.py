@@ -3,6 +3,7 @@ import json
 from flask import request
 from flask_restplus import Namespace, Resource
 
+from controller.auth_controller import auth
 from dto.usage_dto import *
 from dto.working_dto import WorkingDto
 from service.working_service import *
@@ -12,6 +13,7 @@ working_namespace = Namespace('api/working', description='Requests for track nod
 
 @working_namespace.route('/start')
 class WorkingStart(Resource):
+    @auth.login_required
     @working_namespace.doc(description='Node started do task request')
     @working_namespace.expect(WorkingDto.working_dto, validate=True)
     def post(self):
@@ -20,6 +22,7 @@ class WorkingStart(Resource):
 
 @working_namespace.route('/stop')
 class WorkingStop(Resource):
+    @auth.login_required
     @working_namespace.doc(description='Node finished do task request')
     @working_namespace.expect(WorkingDto.working_dto, validate=True)
     def post(self):
