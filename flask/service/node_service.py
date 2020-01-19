@@ -9,5 +9,4 @@ def get_nodes_names():
         .query(Working.node_name)\
         .distinct()\
         .all()
-    a = 1
     return records
