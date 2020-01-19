@@ -1,4 +1,4 @@
-##General
+## General
 
 1. Install JDK on each node:
 	* apt: apt-get install default-jdk
@@ -18,12 +18,12 @@
 7. Add jenkins user to a docker group on each node:
 	* usermod -aG docker jenkins
 
-##Backend
+## Backend
 
 1. Change nginx.conf file in nginx directory: change server directives in upstream "nodes-usage-app" (they must have ips and ports of nodes with flask app).
 2. Run build-backend Jenkins job. Be attentive with databaseAddress param. It must be ip of node with database.
 
-##Frontend
+## Frontend
 
 1. Configure api url.
 2. Run build-frontend Jenkins job.
