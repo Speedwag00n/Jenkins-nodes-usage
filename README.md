@@ -1,29 +1,30 @@
-## General
+# Build
 
-1. Install JDK on each node:
-	* apt: apt-get install default-jdk
-2. Install Jenkins on master node:
-	- apt: apt-get install jenkins
-3. Configure slave nodes. Add following labels: 
-	* nodes-usage-database (for node with database)
-	* nodes-usage-node1 and nodes-usage-node2 (for nodes with flask app)
-	* nodes-usage-nginx (for node with nginx)
-4. Install Docker on each node:
-	* apt: apt-get install docker.io
-5. Enable autoloading and start docker:
+## Installing Docker and Jenkins
+
+1. Install docker on each node.
+2. Enable autoloading and start docker:
 	* systemctl enable docker
 	* systemctl startdocker
-6. Create jenkins user on slave nodes:
-	* adduser jenkins -d /var/jenkins_home
-7. Add jenkins user to a docker group on each node:
+3. Install JDK on a master node:
+	* apt: apt-get install default-jdk
+4. Install Jenkins on the master node:
+	- apt: apt-get install jenkins
+5. Add 'swarm-manager' label for the master node. 
+6. Add jenkins user to a docker group on the master node:
 	* usermod -aG docker jenkins
 
-## Backend
+## Docker Swarm configuration
 
-1. Change nginx.conf file in nginx directory: change server directives in upstream "nodes-usage-app" (they must have ips and ports of nodes with flask app).
-2. Run build-backend Jenkins job. Be attentive with databaseAddress param. It must be ip of node with database.
+1. Run 'docker swarm init --advertise-addr <master-node-ip>' on the master node.
+2. Command from previous step generate command for join worker nodes (docker swarm join --token <token> <master-node-ip>:2377). Run this command on each worker node.
+3. (Optional) If you want not to run flask app and database containers on manager node, you can disable it as a worker. Use command 'docker node update --availability drain <manager-name>' (use 'docker node ls to see all existing nodes').
 
-## Frontend
+## Build
 
-1. Configure api url.
-2. Run build-frontend Jenkins job.
+1. Change nginx.conf file in nginx directory: change server directives in upstream "nodes-usage-app" (they must have ips of all nodes with flask app and port of containers with flask app).
+2. Run Nodes-usage-backend-build Jenkins job.
+
+## Update
+
+1. Run Nodes-usage-backend-update Jenkins job.
